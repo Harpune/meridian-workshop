@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meridian Components — Current-State Architecture</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --blue: #3b82f6;
+    --blue-bg: #eff6ff;
+    --green: #10b981;
+    --green-bg: #ecfdf5;
+    --amber: #f59e0b;
+    --amber-bg: #fffbeb;
+    --purple: #8b5cf6;
+    --purple-bg: #f5f3ff;
+    --red: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0 0 60px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.5;
+  }
+  header {
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 32px 48px;
+  }
+  header .eyebrow { color: var(--blue); font-weight: 700; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+  header h1 { margin: 6px 0 4px; font-size: 28px; }
+  header p { margin: 0; color: var(--muted); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 48px; }
+  section { margin-top: 40px; }
+  h2 { font-size: 20px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+
+  /* Layered diagram */
+  .layers { display: flex; flex-direction: column; gap: 16px; }
+  .layer {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .layer-title { font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 14px; color: var(--muted); }
+  .nodes { display: flex; flex-wrap: wrap; gap: 10px; }
+  .node {
+    border-radius: 8px; padding: 8px 14px; font-size: 14px; font-weight: 600;
+    border: 1px solid transparent;
+  }
+  .node.blue { background: var(--blue-bg); color: var(--blue); border-color: #bfdbfe; }
+  .node.green { background: var(--green-bg); color: var(--green); border-color: #a7f3d0; }
+  .node.amber { background: var(--amber-bg); color: var(--amber); border-color: #fde68a; }
+  .node.purple { background: var(--purple-bg); color: var(--purple); border-color: #ddd6fe; }
+  .arrow { text-align: center; color: var(--muted); font-size: 22px; line-height: 1; }
+  .arrow small { display:block; font-size: 12px; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  th { background: #f1f5f9; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  td code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .findings { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--amber); border-radius: 8px; padding: 16px 20px; }
+  .findings.risk { border-left-color: var(--red); }
+  .findings h3 { margin: 0 0 8px; font-size: 15px; }
+  .findings ul { margin: 0; padding-left: 18px; }
+  .findings li { margin-bottom: 6px; font-size: 14px; }
+  .tag { display:inline-block; font-size: 11px; font-weight:700; padding: 1px 7px; border-radius: 999px; background: var(--blue-bg); color: var(--blue); margin-left: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Engagement · Current-State Review (R4)</div>
+  <h1>Meridian Components — Inventory Dashboard Architecture</h1>
+  <p>As-built review of the application delivered by the previous vendor · prepared 2026-06-30</p>
+</header>
+
+<div class="wrap">
+
+<section>
+  <h2>System Overview</h2>
+  <div class="layers">
+
+    <div class="layer">
+      <div class="layer-title">Presentation · Vue 3 SPA (Vite, port 3000)</div>
+      <div class="nodes">
+        <span class="node blue">App.vue (shell + nav)</span>
+        <span class="node blue">vue-router</span>
+      </div>
+      <div class="nodes" style="margin-top:10px;">
+        <span class="node blue">Dashboard</span>
+        <span class="node blue">Inventory</span>
+        <span class="node blue">Orders</span>
+        <span class="node blue">Demand</span>
+        <span class="node blue">Spending</span>
+        <span class="node blue">Reports</span>
+      </div>
+      <div class="nodes" style="margin-top:10px;">
+        <span class="node purple">FilterBar</span>
+        <span class="node purple">7 detail modals</span>
+        <span class="node purple">LanguageSwitcher</span>
+        <span class="node purple">ProfileMenu</span>
+      </div>
+    </div>
+
+    <div class="arrow">↓ <small>shared state via composables: useFilters · useAuth · useI18n</small></div>
+
+    <div class="layer">
+      <div class="layer-title">Client Data Access</div>
+      <div class="nodes">
+        <span class="node amber">api.js (axios client)</span>
+        <span class="node amber">utils/currency.js</span>
+        <span class="node amber">locales/ en · ja</span>
+      </div>
+    </div>
+
+    <div class="arrow">↓ <small>HTTP / JSON · REST · http://localhost:8001/api</small></div>
+
+    <div class="layer">
+      <div class="layer-title">Application · FastAPI (Uvicorn, port 8001)</div>
+      <div class="nodes">
+        <span class="node green">main.py — 13 route handlers + Pydantic models + CORS</span>
+      </div>
+    </div>
+
+    <div class="arrow">↓ <small>in-process import</small></div>
+
+    <div class="layer">
+      <div class="layer-title">Data · Static JSON (no database)</div>
+      <div class="nodes">
+        <span class="node amber">mock_data.py loader</span>
+        <span class="node amber">inventory.json</span>
+        <span class="node amber">orders.json</span>
+        <span class="node amber">demand_forecasts.json</span>
+        <span class="node amber">backlog_items.json</span>
+        <span class="node amber">spending.json</span>
+        <span class="node amber">transactions.json</span>
+        <span class="node amber">purchase_orders.json</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>API Surface</h2>
+  <table>
+    <thead><tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td>GET</td><td><code>/api/inventory</code></td><td>Inventory list (filters: warehouse, category)</td></tr>
+      <tr><td>GET</td><td><code>/api/inventory/{id}</code></td><td>Single inventory item</td></tr>
+      <tr><td>GET</td><td><code>/api/orders</code></td><td>Orders (filters: warehouse, category, status, month)</td></tr>
+      <tr><td>GET</td><td><code>/api/orders/{id}</code></td><td>Single order</td></tr>
+      <tr><td>GET</td><td><code>/api/demand</code></td><td>Demand forecasts</td></tr>
+      <tr><td>GET</td><td><code>/api/backlog</code></td><td>Backlog items</td></tr>
+      <tr><td>GET</td><td><code>/api/dashboard/summary</code></td><td>KPI rollup (accepts all filters)</td></tr>
+      <tr><td>GET</td><td><code>/api/spending/summary · /monthly · /categories · /transactions</code></td><td>Spending views</td></tr>
+      <tr><td>GET</td><td><code>/api/reports/quarterly · /monthly-trends</code></td><td>Reports page data</td></tr>
+      <tr><td>POST/PATCH/DELETE</td><td><code>/api/tasks</code></td><td>Task CRUD (client-only — no server route yet)<span class="tag">gap</span></td></tr>
+      <tr><td>POST/GET</td><td><code>/api/purchase-orders</code></td><td>Purchase orders (foundation for restocking, R2)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>Observations &amp; Risks</h2>
+  <div class="grid">
+    <div class="findings">
+      <h3>Architecture notes</h3>
+      <ul>
+        <li>Clean, conventional Vue 3 + FastAPI split — easy to extend.</li>
+        <li>Shared state handled well via singleton composables (filters, auth, i18n).</li>
+        <li>i18n scaffolding (en/ja) already present — useful for D2.</li>
+        <li>A <code>purchase-orders</code> endpoint exists — a starting point for the restocking feature (R2).</li>
+      </ul>
+    </div>
+    <div class="findings risk">
+      <h3>Risks &amp; gaps</h3>
+      <ul>
+        <li><strong>No database.</strong> All data is static JSON loaded in-memory; writes (tasks, POs) don't persist across restarts.</li>
+        <li><strong>API base URL hard-coded</strong> to localhost in <code>api.js</code> — no environment config.</li>
+        <li><strong>Reports page</strong> shows defects on inspection — primary remediation target (R1).</li>
+        <li><strong>No automated tests</strong> in the delivered code — covered by R3.</li>
+        <li>Client calls <code>/api/tasks</code> the backend doesn't appear to fully implement — needs verification.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+</body>
+</html>
